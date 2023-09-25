@@ -1,4 +1,4 @@
-# PIZZAS RESTAURANT
+# PIZZA RESTAURANTS
 
 by Christine K Juma.
 
