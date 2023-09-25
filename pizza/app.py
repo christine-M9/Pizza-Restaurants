@@ -12,12 +12,13 @@ db = SQLAlchemy(app)
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
+# Import models
 from models import Restaurant, Pizza, RestaurantPizza
 
-#home route
+# Home route
 @app.route('/')
 def index():
-    return 'HELLO, WELCOME TO PIZZA RESTAURANTS!'
+    return 'HELLO, WELCOME TO CHRISTINES PIZZA RESTAURANTS!'
 
 # Route to get all restaurants
 @app.route('/restaurants', methods=['GET'])
@@ -89,7 +90,7 @@ def create_restaurant():
         'address': restaurant.address
     }), 201
 
-# delete a specific restaurant by ID
+# Delete a specific restaurant by ID
 @app.route('/restaurants/<int:id>', methods=['DELETE'])
 def delete_restaurant(id):
     restaurant = Restaurant.query.get(id)
@@ -110,24 +111,44 @@ def create_restaurant_pizza():
     pizza_id = info.get('pizza_id')
     restaurant_id = info.get('restaurant_id')
     
+ # Validating inputs
     if price is None or pizza_id is None or restaurant_id is None:
+        print("Validation error")
         return jsonify({'errors': ['validation errors']}), 400
 
     pizza = Pizza.query.get(pizza_id)
     restaurant = Restaurant.query.get(restaurant_id)
 
     if pizza is None or restaurant is None:
+        print("Pizza or restaurant not found")
         return jsonify({'errors': ['validation errors']}), 400
 
-    restaurant_pizza = RestaurantPizza(price=price, restaurant=restaurant, pizza=pizza)
+    restaurant_pizza = RestaurantPizza(price=price, restaurant_id=restaurant_id, pizza_id=pizza_id)
     db.session.add(restaurant_pizza)
     db.session.commit()
+
+    #print("Successfully created restaurant pizza")
 
     return jsonify({
         'id': pizza.id,
         'name': pizza.name,
         'ingredients': pizza.ingredients
     }), 201
+
+
+
+# Route to get all restaurant_pizzas
+@app.route('/restaurant_pizzas', methods=['GET'])
+def get_restaurant_pizzas():
+    restaurant_pizzas = RestaurantPizza.query.all()
+    restaurant_pizza_info = [{
+        'id': rp.id,
+        'price': rp.price,
+        'restaurant_id': rp.restaurant_id,
+        'pizza_id': rp.pizza_id
+    } for rp in restaurant_pizzas]
+    return jsonify(restaurant_pizza_info)
+
 
 
 if __name__ == '__main__':
